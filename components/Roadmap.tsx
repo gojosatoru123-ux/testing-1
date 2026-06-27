@@ -1,5 +1,5 @@
 import { useProgress, resetAllQuizzes, ProgressStore } from '@/lib/progress';
-import { CATEGORY_ORDER } from '../lib/content';
+import { CATEGORY_ORDER } from '@/lib/manifest';
 import { Network, Target, BookOpen, CheckCircle2, ArrowRight, Trophy, RotateCcw, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MANIFEST } from '@/lib/manifest';

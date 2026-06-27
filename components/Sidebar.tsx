@@ -1,5 +1,6 @@
+'use client';
 import { useState, useEffect, useRef } from 'react';
-import { ArticleMeta, CATEGORIES, CATEGORY_ORDER } from '@/lib/content';
+import { ArticleMeta, CATEGORIES, CATEGORY_ORDER } from '@/lib/manifest';
 import { ChevronDown, ChevronRight, BookOpen, X, Menu, Zap, Code, LayoutGrid, Target, Network, LayersIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';

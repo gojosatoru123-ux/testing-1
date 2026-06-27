@@ -1,6 +1,7 @@
+'use client';
 import { useState, useEffect, useRef } from 'react';
 import { Search as SearchIcon, X, FileText } from 'lucide-react';
-import { ArticleMeta } from '@/lib/content';
+import type { ArticleMeta } from '@/lib/manifest';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 

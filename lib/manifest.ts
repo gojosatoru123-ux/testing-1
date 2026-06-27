@@ -954,3 +954,18 @@ export const MANIFEST=[
     "hasMindmap": true
   }
 ]
+
+export const CATEGORY_ORDER = [
+  'Backend Design',
+  'High Level Design',
+  'Low Level Design',
+  'Web Security',
+  'SEO',
+  'Design',
+  'Networking',
+];
+export const CATEGORIES = MANIFEST.reduce<Record<string, typeof MANIFEST>>((acc, item) => {
+  (acc[item.category] ??= []).push(item);
+  return acc;
+}, {});
+export type ArticleMeta = (typeof MANIFEST)[number];

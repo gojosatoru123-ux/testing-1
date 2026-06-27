@@ -1,10 +1,11 @@
+'use client';
 import { useEffect, useRef, useState } from 'react';
 import {
   ArrowRight, Code, Network, Shield, Globe,
   Zap, Target, BookOpen, ChevronDown, LayoutGrid,
   LayersIcon,
 } from 'lucide-react';
-import { MANIFEST, CATEGORIES, CATEGORY_ORDER } from '../lib/content';
+import { MANIFEST, CATEGORIES, CATEGORY_ORDER } from '@/lib/manifest';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 

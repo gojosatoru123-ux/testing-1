@@ -1,98 +1,63 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Metadata } from 'next';
-import { getAllSlugs, getArticle } from '@/lib/content';
-import { markdownToHtml, generateToc } from '@/lib/markdown';
+import { ArrowLeft, BookOpen } from 'lucide-react';
+import { MindMap } from '@/components/Mindmap';
+import { articleToMindmap, getAllSlugs, getArticle } from '@/lib/content';
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
-// 1. Tell Next.js exactly what paths to build during compilation
-export async function generateStaticParams() {
-  const slugs = getAllSlugs('mindmap');
-  return slugs.map((slug) => ({ slug }));
+export function generateStaticParams() {
+  return getAllSlugs('mindmap').map((slug) => ({ slug }));
 }
 
-// 2. Build-time SEO Metadata generation
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const article = getArticle('mindmap', slug);
-
   if (!article) return {};
 
   return {
-    title: `${article.title} | Documentation`,
-    description: article.description,
-    alternates: {
-      canonical: `/mindmap/${slug}`,
-    },
+    title: `${article.title} Mind Map | Backend Docs`,
+    description: article.description || `Interactive mind map for ${article.title}.`,
+    alternates: { canonical: `/mindmap/${slug}` },
     openGraph: {
-      title: article.title,
-      description: article.description,
+      title: `${article.title} Mind Map`,
+      description: article.description || `Interactive mind map for ${article.title}.`,
       type: 'article',
       images: article.image ? [{ url: article.image }] : [],
     },
   };
 }
 
-// 3. Ultra-lightweight Static Server Component
-export default async function mindmapPage({ params }: Props) {
+export default async function MindmapPage({ params }: Props) {
   const { slug } = await params;
   const article = getArticle('mindmap', slug);
+  if (!article) notFound();
 
-  if (!article) {
-    notFound();
-  }
-
-  // Heavy lifting done compile-time
-  const htmlContent = await markdownToHtml(article.content);
-  const toc = generateToc(article.content);
+  const data = articleToMindmap(article);
+  const articleSlug = typeof article.data.articleSlug === 'string' ? article.data.articleSlug : article.slug;
 
   return (
-    <div className="container mx-auto px-4 py-8 flex gap-8">
-      <article className="prose prose-slate dark:prose-invert max-w-3xl flex-1">
-        <header className="mb-8">
-          <span className="text-sm font-semibold text-blue-500 uppercase tracking-wider">
-            {article.category}
-          </span>
-          <h1 className="mt-2 text-4xl font-extrabold tracking-tight mb-2">
-            {article.title}
-          </h1>
-          <div className="text-sm text-gray-500 flex gap-4">
-            {article.updated && <time>Updated: {article.updated}</time>}
-            <span>{article.readingTime}</span>
-          </div>
-        </header>
-
-        {/* Browser receives pure, styled, production-ready HTML */}
-        <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
-      </article>
-
-      {/* Static Table of Contents sidebar */}
-      {toc.length > 0 && (
-        <aside className="hidden xl:block w-64 shrink-0 strict-toc">
-          <div className="sticky top-8">
-            <h4 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-4">
-              On This Page
-            </h4>
-            <ul className="space-y-2 text-sm">
-              {toc.map((item) => (
-                <li
-                  key={item.id}
-                  style={{ paddingLeft: `${(item.level - 2) * 12}px` }}
-                >
-                  <a
-                    href={`#${item.id}`}
-                    className="text-gray-600 dark:text-gray-400 hover:underline"
-                  >
-                    {item.text}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </aside>
-      )}
-    </div>
+    <section className="flex h-[calc(100vh-8rem)] min-h-[640px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 px-5 py-4">
+        <div>
+          <Link href={`/docs/${articleSlug}`} className="mb-2 inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900">
+            <ArrowLeft className="h-4 w-4" />
+            Back to article
+          </Link>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-950">{article.title}</h1>
+          <p className="text-sm text-slate-500">Drag, zoom, and collapse branches to explore the concept structure.</p>
+        </div>
+        <Link href={`/docs/${articleSlug}`} className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">
+          <BookOpen className="h-4 w-4" />
+          Read guide
+        </Link>
+      </header>
+      <div className="min-h-0 flex-1">
+        <MindMap data={data} />
+      </div>
+    </section>
   );
 }

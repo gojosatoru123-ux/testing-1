@@ -1,11 +1,12 @@
+'use client';
 import {
   ArrowRight, Code, Zap, Shield, Globe,
   ChevronRight, Sparkles, Target, LayoutGrid,
   Network, BookOpen, Brain, Hash, Trophy,
 } from 'lucide-react';
-import { MANIFEST, CATEGORIES, CATEGORY_ORDER } from '../lib/content';
+import { MANIFEST, CATEGORIES, CATEGORY_ORDER } from '@/lib/manifest';
 import { useProgress } from '@/lib/progress';
-import { Roadmap } from '../components/Roadmap';
+import { Roadmap } from '@/components/Roadmap';
 import { cn } from '@/lib/utils';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
