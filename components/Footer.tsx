@@ -1,3 +1,4 @@
+'use client';
 import Search  from './Search';
 import { MANIFEST } from '@/lib/manifest';
 import { usePathname } from 'next/navigation';

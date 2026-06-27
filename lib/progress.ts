@@ -1,3 +1,4 @@
+'use client';
 import { useState, useEffect } from 'react';
 
 const KEY = 'docs-site-progress-v1';
