@@ -1,14 +1,18 @@
-'use client'
 import { useEffect, useRef, useState } from 'react';
 import {
   ArrowRight, Code, Network, Shield, Globe,
   Zap, Target, BookOpen, ChevronDown, LayoutGrid,
   LayersIcon,
 } from 'lucide-react';
+import { MANIFEST, CATEGORIES, CATEGORY_ORDER } from '../lib/content';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 
 // ─── Dynamic data from MANIFEST ──────────────────────────────────────────────
+const totalArticles = MANIFEST.length;
+const totalPractice = MANIFEST.filter(a => a.hasPractice).length;
+const totalMindmaps = MANIFEST.filter(a => a.hasMindmap).length;
+const totalCats = [...new Set(MANIFEST.map(a => a.category))].length;
 
 const CATEGORY_CONFIG: Record<string, { color: string; gradient: string; icon: React.ReactNode; accent: string }> = {
   'Low Level Design': { color: '#a78bfa', gradient: 'from-violet-500 to-indigo-600', icon: <Code className="w-5 h-5" />, accent: '#7c3aed' },
@@ -25,13 +29,14 @@ function getCfg(cat: string) { return CATEGORY_CONFIG[cat] ?? FALLBACK_CFG; }
 
 // ─── Ordered categories for display ──────────────────────────────────────────
 function getOrderedCats() {
-  return [];
+  const all = Object.keys(CATEGORIES);
+  return [...CATEGORY_ORDER.filter(c => all.includes(c)), ...all.filter(c => !CATEGORY_ORDER.includes(c))];
 }
 const orderedCats = getOrderedCats();
 
 // ─── Ticker tape — article titles scrolling horizontally ─────────────────────
 function TickerTape() {
-  const titles = ['Low Level Design', 'High Level Design', 'Backend Design', 'Web Security', 'SEO', 'Design', 'Networking'];
+  const titles = MANIFEST.map(a => a.title);
   // duplicate for seamless loop
   const items = [...titles, ...titles];
   return (
@@ -204,7 +209,7 @@ export default function LandingPage() {
             style={{ opacity: 0, animation: 'fadeSlideUp 0.8s ease 0.1s forwards' }}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-            100 articles ·100 quizzes · 100 mind maps · 100% free
+            {totalArticles} articles · {totalPractice} quizzes · {totalMindmaps} mind maps · 100% free
           </div>
 
           {/* Headline */}
@@ -238,7 +243,7 @@ export default function LandingPage() {
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <Link
-              href={`/docs`}
+              href={`/docs/${MANIFEST.find(a => a.hasPractice)?.slug ?? MANIFEST[0]?.slug}`}
               className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 hover:border-white/20 font-medium px-7 py-3.5 rounded-xl text-sm transition-all"
             >
               <Target className="w-4 h-4" />
@@ -264,10 +269,10 @@ export default function LandingPage() {
         <section className="px-6 md:px-12 py-16">
           <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { val: 1, suffix: '', label: 'In-depth articles', color: '#a78bfa' },
-              { val: 1, suffix: '+', label: 'Practice quiz sets', color: '#34d399' },
-              { val: 1, suffix: '', label: 'Interactive mind maps', color: '#38bdf8' },
-              { val: 1, suffix: '', label: 'Subject tracks', color: '#fbbf24' },
+              { val: totalArticles, suffix: '', label: 'In-depth articles', color: '#a78bfa' },
+              { val: totalPractice, suffix: '+', label: 'Practice quiz sets', color: '#34d399' },
+              { val: totalMindmaps, suffix: '', label: 'Interactive mind maps', color: '#38bdf8' },
+              { val: totalCats, suffix: '', label: 'Subject tracks', color: '#fbbf24' },
             ].map(({ val, suffix, label, color }, i) => (
               <Reveal key={label} delay={i * 80}>
                 <div
@@ -317,7 +322,7 @@ export default function LandingPage() {
               <div className="mb-12">
                 <p className="text-xs font-mono-dm text-white/30 uppercase tracking-widest mb-3">What's inside</p>
                 <h2 className="font-display text-4xl md:text-5xl text-white tracking-tight leading-[1.18] pb-[0.06em]">
-                  100 tracks.<br />
+                  {totalCats} tracks.<br />
                   <span className="text-white/30">Every layer of the stack.</span>
                 </h2>
               </div>
@@ -326,7 +331,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {orderedCats.map((cat, i) => {
                 const cfg = getCfg(cat);
-                const articles = [{ slug: 'example-article', title: 'Example Article', hasPractice: true, hasMindmap: true }]; // Replace with actual articles for the category
+                const articles = CATEGORIES[cat] ?? [];
                 const withQuiz = articles.filter(a => a.hasPractice).length;
                 const withMap = articles.filter(a => a.hasMindmap).length;
                 const firstSlug = articles[0]?.slug;
@@ -369,7 +374,7 @@ export default function LandingPage() {
                             </div>
 
                             {/* Articles preview */}
-                            {/* <div className="space-y-1 mb-4">
+                            <div className="space-y-1 mb-4">
                               {articles.slice(0, 3).map(a => (
                                 <p key={a.slug} className="text-sm text-white/40 truncate group-hover:text-white/60 transition-colors">
                                   → {a.title}
@@ -380,7 +385,7 @@ export default function LandingPage() {
                                   +{articles.length - 3} more articles
                                 </p>
                               )}
-                            </div> */}
+                            </div>
 
                             {/* Badges */}
                             <div className="flex items-center gap-2 flex-wrap">
@@ -438,7 +443,7 @@ export default function LandingPage() {
                   color: '#a78bfa',
                   icon: <BookOpen className="w-6 h-6" />,
                   title: 'Read deep articles',
-                  desc: `${100} articles written to build real intuition — not just surface definitions. Code examples, diagrams, real-world tradeoffs.`,
+                  desc: `${totalArticles} articles written to build real intuition — not just surface definitions. Code examples, diagrams, real-world tradeoffs.`,
                   cta: 'Browse articles',
                   href: '/home',
                 },
@@ -447,18 +452,18 @@ export default function LandingPage() {
                   color: '#fbbf24',
                   icon: <Target className="w-6 h-6" />,
                   title: 'Practice until it sticks',
-                  desc: `${100} quiz sets from Easy to Hard. Self-assess with expandable answers. Progress saved automatically — come back anytime.`,
+                  desc: `${totalPractice} quiz sets from Easy to Hard. Self-assess with expandable answers. Progress saved automatically — come back anytime.`,
                   cta: 'Start a quiz',
-                  href: `/practice`,
+                  href: `/practice/${MANIFEST.find(a => a.hasPractice)?.slug}`,
                 },
                 {
                   num: '03',
                   color: '#38bdf8',
                   icon: <Network className="w-6 h-6" />,
                   title: 'See the full picture',
-                  desc: `100 interactive mind maps that show how concepts connect. Understand the system, not just the parts.`,
+                  desc: `${totalMindmaps} interactive mind maps that show how concepts connect. Understand the system, not just the parts.`,
                   cta: 'View a mind map',
-                  href: `/mindmap/`,
+                  href: `/mindmap/${MANIFEST.find(a => a.hasMindmap)?.slug}`,
                 },
               ].map(({ num, color, icon, title, desc, cta, href }, i) => (
                 <Reveal key={num} delay={i * 100}>
@@ -521,7 +526,7 @@ export default function LandingPage() {
                       <span className="ml-2 text-white/20 text-[10px]">interview-prompt.txt</span>
                     </div>
                     <p className="text-violet-300/80 mb-2">You are a senior engineering interviewer at Google...</p>
-                    <p className="text-white/30 mb-2">Generate 15 questions on <span className="text-teal-400">"NNN"</span>.</p>
+                    <p className="text-white/30 mb-2">Generate 15 questions on <span className="text-teal-400">"{MANIFEST[0]?.title}"</span>.</p>
                     <p className="text-white/20 mb-2">Each question must include:</p>
                     <p className="text-white/15 pl-2">→ Hidden interviewer intent</p>
                     <p className="text-white/15 pl-2">→ Key points a strong answer covers</p>
@@ -546,7 +551,7 @@ export default function LandingPage() {
               <span className="hero-line">right now.</span>
             </h2>
             <p className="text-white/30 mb-10 text-lg max-w-md mx-auto">
-              {100} articles waiting. Your next interview won't wait.
+              {totalArticles} articles waiting. Your next interview won't wait.
             </p>
             <Link
               href="/home"
@@ -572,7 +577,7 @@ export default function LandingPage() {
             </div>
           </div>
         </footer> */}
-        <Footer />
+        <Footer/>
       </div>
 
       {/* Keyframe for hero entrance */}
